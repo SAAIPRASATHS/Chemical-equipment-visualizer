@@ -35,6 +35,38 @@ function Dashboard() {
         }
     };
 
+    const handleExport = async (format) => {
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await fetch(
+                `http://localhost:8000/api/export/${format}/${current_dataset.id}/`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
+
+            if (!response.ok) throw new Error('Export failed');
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `export_${current_dataset.id}.${format === 'excel' ? 'xlsx' : format}`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+
+            // Close menu
+            document.getElementById('export-menu').style.display = 'none';
+        } catch (error) {
+            console.error(`Error exporting to ${format}:`, error);
+            alert(`Failed to export to ${format}. Please try again.`);
+        }
+    };
+
     if (loading) {
         return (
             <div className="loading">
@@ -89,44 +121,53 @@ function Dashboard() {
                                 minWidth: '150px'
                             }}
                         >
-                            <a
-                                href={`http://localhost:8000/api/export/excel/${current_dataset.id}/`}
+                            <button
+                                onClick={() => handleExport('excel')}
                                 style={{
+                                    width: '100%',
                                     display: 'block',
                                     padding: '0.75rem 1rem',
-                                    textDecoration: 'none',
+                                    backgroundColor: 'transparent',
+                                    border: 'none',
+                                    borderBottom: '1px solid var(--border-color)',
                                     color: 'var(--text-primary)',
-                                    borderBottom: '1px solid var(--border-color)'
+                                    textAlign: 'left',
+                                    cursor: 'pointer'
                                 }}
-                                onClick={() => document.getElementById('export-menu').style.display = 'none'}
                             >
                                 📊 Export to Excel
-                            </a>
-                            <a
-                                href={`http://localhost:8000/api/export/csv/${current_dataset.id}/`}
+                            </button>
+                            <button
+                                onClick={() => handleExport('csv')}
                                 style={{
+                                    width: '100%',
                                     display: 'block',
                                     padding: '0.75rem 1rem',
-                                    textDecoration: 'none',
+                                    backgroundColor: 'transparent',
+                                    border: 'none',
+                                    borderBottom: '1px solid var(--border-color)',
                                     color: 'var(--text-primary)',
-                                    borderBottom: '1px solid var(--border-color)'
+                                    textAlign: 'left',
+                                    cursor: 'pointer'
                                 }}
-                                onClick={() => document.getElementById('export-menu').style.display = 'none'}
                             >
                                 📄 Export to CSV
-                            </a>
-                            <a
-                                href={`http://localhost:8000/api/export/json/${current_dataset.id}/`}
+                            </button>
+                            <button
+                                onClick={() => handleExport('json')}
                                 style={{
+                                    width: '100%',
                                     display: 'block',
                                     padding: '0.75rem 1rem',
-                                    textDecoration: 'none',
-                                    color: 'var(--text-primary)'
+                                    backgroundColor: 'transparent',
+                                    border: 'none',
+                                    color: 'var(--text-primary)',
+                                    textAlign: 'left',
+                                    cursor: 'pointer'
                                 }}
-                                onClick={() => document.getElementById('export-menu').style.display = 'none'}
                             >
                                 🔧 Export to JSON
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>
