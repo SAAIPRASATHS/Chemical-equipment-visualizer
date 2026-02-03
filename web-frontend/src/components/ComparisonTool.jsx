@@ -8,6 +8,7 @@ function ComparisonTool() {
     const [selectedIds, setSelectedIds] = useState([]);
     const [comparisonData, setComparisonData] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [initialLoading, setInitialLoading] = useState(true);
     const [error, setError] = useState('');
 
     useEffect(() => {
@@ -15,13 +16,21 @@ function ComparisonTool() {
     }, []);
 
     const fetchEquipment = async () => {
+        setInitialLoading(true);
+        setError('');
         try {
             const data = await getSummary();
+            console.log('Summary data:', data);
             if (data.current_dataset && data.current_dataset.equipment) {
                 setEquipment(data.current_dataset.equipment);
+            } else {
+                setError('No equipment data available. Please upload data first.');
             }
         } catch (err) {
-            setError('Failed to load equipment data');
+            console.error('Error fetching equipment:', err);
+            setError('Failed to load equipment data. Please try refreshing the page.');
+        } finally {
+            setInitialLoading(false);
         }
     };
 
@@ -116,51 +125,69 @@ function ComparisonTool() {
         <div className="container">
             <h1 style={{ marginBottom: '2rem' }}>Equipment Comparison Tool</h1>
 
+            {initialLoading && (
+                <div style={{ textAlign: 'center', padding: '3rem' }}>
+                    <div style={{ fontSize: '1.2rem', color: 'var(--text-muted)' }}>
+                        Loading equipment data...
+                    </div>
+                </div>
+            )}
+
             {error && <div className="alert alert-error">{error}</div>}
 
-            <div className="card" style={{ marginBottom: '2rem' }}>
-                <h3 className="card-header">Select Equipment to Compare (2-4)</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem', padding: '1rem' }}>
-                    {equipment.map((eq) => (
-                        <label
-                            key={eq.id}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                padding: '0.75rem',
-                                border: selectedIds.includes(eq.id) ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)',
-                                borderRadius: '8px',
-                                cursor: 'pointer',
-                                backgroundColor: selectedIds.includes(eq.id) ? 'var(--bg-hover)' : 'var(--bg-card)',
-                            }}
-                        >
-                            <input
-                                type="checkbox"
-                                checked={selectedIds.includes(eq.id)}
-                                onChange={() => handleSelectionChange(eq.id)}
-                                style={{ marginRight: '0.5rem' }}
-                            />
-                            <div>
-                                <div style={{ fontWeight: 'bold' }}>{eq.name}</div>
-                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                                    {eq.equipment_type} | Health: {eq.health_score.toFixed(1)}
-                                </div>
-                            </div>
-                        </label>
-                    ))}
+            {!initialLoading && equipment.length === 0 && !error && (
+                <div className="alert alert-warning">
+                    No equipment data found. Please upload data from the Upload page first.
                 </div>
+            )}
 
-                <div style={{ padding: '1rem', textAlign: 'center' }}>
-                    <button
-                        onClick={handleCompare}
-                        disabled={selectedIds.length < 2 || loading}
-                        className="btn btn-primary"
-                        style={{ padding: '0.75rem 2rem' }}
-                    >
-                        {loading ? 'Comparing...' : `Compare ${selectedIds.length} Equipment`}
-                    </button>
-                </div>
-            </div>
+            {!initialLoading && equipment.length > 0 && (
+                <>
+                    <div className="card" style={{ marginBottom: '2rem' }}>
+                        <h3 className="card-header">Select Equipment to Compare (2-4)</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem', padding: '1rem' }}>
+                            {equipment.map((eq) => (
+                                <label
+                                    key={eq.id}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        padding: '0.75rem',
+                                        border: selectedIds.includes(eq.id) ? '2px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        backgroundColor: selectedIds.includes(eq.id) ? 'var(--bg-hover)' : 'var(--bg-card)',
+                                    }}
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedIds.includes(eq.id)}
+                                        onChange={() => handleSelectionChange(eq.id)}
+                                        style={{ marginRight: '0.5rem' }}
+                                    />
+                                    <div>
+                                        <div style={{ fontWeight: 'bold' }}>{eq.name}</div>
+                                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                            {eq.equipment_type} | Health: {eq.health_score.toFixed(1)}
+                                        </div>
+                                    </div>
+                                </label>
+                            ))}
+                        </div>
+
+                        <div style={{ padding: '1rem', textAlign: 'center' }}>
+                            <button
+                                onClick={handleCompare}
+                                disabled={selectedIds.length < 2 || loading}
+                                className="btn btn-primary"
+                                style={{ padding: '0.75rem 2rem' }}
+                            >
+                                {loading ? 'Comparing...' : `Compare ${selectedIds.length} Equipment`}
+                            </button>
+                        </div>
+                    </div>
+                </>
+            )}
 
             {comparisonData && (
                 <>
