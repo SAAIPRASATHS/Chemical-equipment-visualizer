@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: chemical-equipment-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: DEBUG
+        value: False
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: chemical-equipment-db
+          property: connectionString
+
+  - type: web
+    name: chemical-equipment-frontend
+    env: static
+    buildCommand: cd web-frontend && npm install && npm run build
+    staticPublishPath: ./web-frontend/dist
+
+databases:
+  - name: chemical-equipment-db
+    databaseName: chemical_equipment
+    user: chemical_equipment_user
