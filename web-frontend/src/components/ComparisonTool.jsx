@@ -2,6 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { getSummary } from '../services/api';
 import axios from 'axios';
 import { Radar } from 'react-chartjs-2';
+import {
+    Chart as ChartJS,
+    RadialLinearScale,
+    PointElement,
+    LineElement,
+    Filler,
+    Tooltip,
+    Legend
+} from 'chart.js';
+
+// Register Chart.js components for radar charts
+ChartJS.register(
+    RadialLinearScale,
+    PointElement,
+    LineElement,
+    Filler,
+    Tooltip,
+    Legend
+);
 
 function ComparisonTool() {
     const [equipment, setEquipment] = useState([]);
