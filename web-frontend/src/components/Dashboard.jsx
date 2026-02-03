@@ -122,30 +122,29 @@ function Dashboard() {
             <h2 style={{ marginBottom: '1rem', marginTop: '2rem' }}>Visualizations</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
                 <div className="card">
-                    <EquipmentTypeChart data={summary.type_distribution} />
+                    <EquipmentTypeChart data={current_dataset.type_distribution} />
                 </div>
                 <div className="card">
-                    <RiskDistributionChart data={summary.risk_distribution} />
+                    <RiskDistributionChart data={risk_distribution} />
                 </div>
             </div>
 
-            {/* Parameter Trends */}
-            {summary.parameter_trends && (
-                <div className="card" style={{ marginBottom: '2rem' }}>
-                    <ParameterTrendsChart data={summary.parameter_trends} />
-                </div>
-            )}
+
 
             {/* Trend Comparison */}
-            {summary.trend_comparison && summary.trend_comparison.length > 0 && (
+            {trend_comparison && (
                 <>
                     <h2 style={{ marginBottom: '1rem' }}>Trend Comparison</h2>
                     <div className="card" style={{ marginBottom: '2rem' }}>
-                        <ParameterTrendsChart trendComparison={trend_comparison} />
+                        <div style={{ padding: '1rem' }}>
+                            <p><strong>Pressure Change:</strong> {trend_comparison.pressure_change}%</p>
+                            <p><strong>Temperature Change:</strong> {trend_comparison.temperature_change}%</p>
+                            <p><strong>Flowrate Change:</strong> {trend_comparison.flowrate_change}%</p>
+                        </div>
 
-                        {trend_comparison.new_critical_equipment.length > 0 && (
+                        {trend_comparison.new_critical_equipment && trend_comparison.new_critical_equipment.length > 0 && (
                             <div className="alert alert-warning" style={{ marginTop: '1rem' }}>
-                                <strong>⚠️ New Critical Equipment:</strong> {trend_comparison.new_critical_equipment.join(', ')}
+                                <strong>New Critical Equipment:</strong> {trend_comparison.new_critical_equipment.join(', ')}
                             </div>
                         )}
                     </div>
