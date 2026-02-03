@@ -110,6 +110,7 @@ export const getDatasetDetail = async (datasetId) => {
 
 // Generate Report
 export const generateReport = (datasetId) => {
+    // Return the API endpoint - the component will handle the authenticated request
     return `${API_BASE_URL}/report/${datasetId}/`;
 };
 

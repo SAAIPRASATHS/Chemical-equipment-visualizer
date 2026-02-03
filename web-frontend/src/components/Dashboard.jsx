@@ -28,10 +28,34 @@ function Dashboard() {
         }
     };
 
-    const handleDownloadReport = () => {
-        if (summary?.current_dataset?.id) {
-            const reportUrl = generateReport(summary.current_dataset.id);
-            window.open(reportUrl, '_blank');
+    const handleDownloadReport = async () => {
+        if (!summary?.current_dataset?.id) return;
+
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await fetch(
+                `http://localhost:8000/api/report/${current_dataset.id}/`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
+
+            if (!response.ok) throw new Error('Report generation failed');
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `report_${current_dataset.id}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error downloading report:', error);
+            alert('Failed to download report. Please try again.');
         }
     };
 
