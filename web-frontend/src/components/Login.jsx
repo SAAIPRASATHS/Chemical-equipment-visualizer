@@ -25,7 +25,7 @@ function Login({ setIsAuthenticated }) {
                 localStorage.setItem('access_token', data.access);
                 localStorage.setItem('refresh_token', data.refresh);
                 setIsAuthenticated(true);
-                navigate('/dashboard');
+                navigate('/upload');
             } else {
                 await register(formData.username, formData.email, formData.password, formData.role);
                 setError('');

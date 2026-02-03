@@ -45,7 +45,7 @@ function App() {
                     path="/login"
                     element={
                         isAuthenticated ?
-                            <Navigate to="/dashboard" /> :
+                            <Navigate to="/upload" /> :
                             <Login setIsAuthenticated={setIsAuthenticated} />
                     }
                 />
@@ -81,7 +81,7 @@ function App() {
                             <Navigate to="/login" />
                     }
                 />
-                <Route path="/" element={<Navigate to="/dashboard" />} />
+                <Route path="/" element={<Navigate to="/upload" />} />
             </Routes>
         </Router>
     );
