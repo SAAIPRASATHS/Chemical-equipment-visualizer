@@ -25,7 +25,9 @@ ChartJS.register(
     LineElement
 );
 
-export function EquipmentTypeChart({ typeDistribution }) {
+export function EquipmentTypeChart({ data: typeDistribution }) {
+    if (!typeDistribution) return null;
+
     const data = {
         labels: Object.keys(typeDistribution),
         datasets: [
@@ -33,13 +35,13 @@ export function EquipmentTypeChart({ typeDistribution }) {
                 label: 'Equipment Count',
                 data: Object.values(typeDistribution),
                 backgroundColor: [
-                    'rgba(63, 81, 181, 0.8)',
-                    'rgba(92, 107, 192, 0.8)',
-                    'rgba(121, 134, 203, 0.8)',
-                    'rgba(159, 168, 218, 0.8)',
-                    'rgba(197, 202, 233, 0.8)',
+                    'rgba(33, 150, 243, 0.8)',
+                    'rgba(66, 165, 245, 0.8)',
+                    'rgba(100, 181, 246, 0.8)',
+                    'rgba(144, 202, 249, 0.8)',
+                    'rgba(187, 222, 251, 0.8)',
                 ],
-                borderColor: 'rgba(63, 81, 181, 1)',
+                borderColor: 'rgba(33, 150, 243, 1)',
                 borderWidth: 2,
             },
         ],
@@ -55,18 +57,18 @@ export function EquipmentTypeChart({ typeDistribution }) {
             title: {
                 display: true,
                 text: 'Equipment Type Distribution',
-                color: '#e8eaf6',
+                color: '#1a1a1a',
                 font: { size: 16, weight: 'bold' },
             },
         },
         scales: {
             y: {
-                ticks: { color: '#9fa8da' },
-                grid: { color: 'rgba(63, 81, 181, 0.2)' },
+                ticks: { color: '#4a5568' },
+                grid: { color: 'rgba(33, 150, 243, 0.1)' },
             },
             x: {
-                ticks: { color: '#9fa8da' },
-                grid: { color: 'rgba(63, 81, 181, 0.2)' },
+                ticks: { color: '#4a5568' },
+                grid: { color: 'rgba(33, 150, 243, 0.1)' },
             },
         },
     };
@@ -78,7 +80,9 @@ export function EquipmentTypeChart({ typeDistribution }) {
     );
 }
 
-export function RiskDistributionChart({ riskDistribution }) {
+export function RiskDistributionChart({ data: riskDistribution }) {
+    if (!riskDistribution) return null;
+
     const data = {
         labels: ['Healthy', 'Warning', 'Critical'],
         datasets: [
@@ -90,10 +94,10 @@ export function RiskDistributionChart({ riskDistribution }) {
                 ],
                 backgroundColor: [
                     'rgba(76, 175, 80, 0.8)',
-                    'rgba(255, 152, 0, 0.8)',
+                    'rgba(255, 193, 7, 0.8)',
                     'rgba(244, 67, 54, 0.8)',
                 ],
-                borderColor: ['#4caf50', '#ff9800', '#f44336'],
+                borderColor: ['#4caf50', '#ffc107', '#f44336'],
                 borderWidth: 2,
             },
         ],
@@ -105,12 +109,12 @@ export function RiskDistributionChart({ riskDistribution }) {
         plugins: {
             legend: {
                 position: 'bottom',
-                labels: { color: '#e8eaf6' },
+                labels: { color: '#1a1a1a' },
             },
             title: {
                 display: true,
                 text: 'Risk Distribution',
-                color: '#e8eaf6',
+                color: '#1a1a1a',
                 font: { size: 16, weight: 'bold' },
             },
         },
