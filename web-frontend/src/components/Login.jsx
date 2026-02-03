@@ -31,9 +31,42 @@ function Login({ setIsAuthenticated }) {
                 setError('');
                 alert('Registration successful! Please login.');
                 setIsLogin(true);
+                // Reset form
+                setFormData({
+                    username: '',
+                    email: '',
+                    password: '',
+                    role: 'viewer'
+                });
             }
         } catch (err) {
-            setError(err.response?.data?.detail || 'Authentication failed. Please try again.');
+            // Handle different error formats
+            let errorMessage = 'Authentication failed. Please try again.';
+
+            if (err.response?.data) {
+                const errorData = err.response.data;
+
+                // Check for detail message (login errors)
+                if (errorData.detail) {
+                    errorMessage = errorData.detail;
+                }
+                // Check for field-specific errors (registration errors)
+                else if (typeof errorData === 'object') {
+                    const errors = [];
+                    for (const [field, messages] of Object.entries(errorData)) {
+                        if (Array.isArray(messages)) {
+                            errors.push(`${field}: ${messages.join(', ')}`);
+                        } else {
+                            errors.push(`${field}: ${messages}`);
+                        }
+                    }
+                    if (errors.length > 0) {
+                        errorMessage = errors.join('. ');
+                    }
+                }
+            }
+
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
