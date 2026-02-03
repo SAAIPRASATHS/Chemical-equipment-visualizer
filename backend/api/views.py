@@ -276,3 +276,110 @@ def get_dataset_detail(request, dataset_id):
         return Response({
             'error': 'Dataset not found'
         }, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def compare_equipment(request):
+    """
+    Compare multiple equipment units side-by-side.
+    Accepts list of equipment IDs and returns comparison data.
+    """
+    try:
+        equipment_ids = request.data.get('equipment_ids', [])
+        
+        if not equipment_ids or len(equipment_ids) < 2:
+            return Response({
+                'error': 'Please select at least 2 equipment to compare'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        if len(equipment_ids) > 4:
+            return Response({
+                'error': 'Maximum 4 equipment can be compared at once'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get equipment data
+        equipment_list = Equipment.objects.filter(
+            id__in=equipment_ids,
+            dataset__uploaded_by=request.user
+        )
+        
+        if equipment_list.count() != len(equipment_ids):
+            return Response({
+                'error': 'Some equipment not found or access denied'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # Serialize equipment data
+        comparison_data = {
+            'equipment': EquipmentSerializer(equipment_list, many=True).data,
+            'comparison_metrics': {
+                'avg_health_score': sum(eq.health_score for eq in equipment_list) / len(equipment_list),
+                'best_performer': max(equipment_list, key=lambda x: x.health_score).name,
+                'worst_performer': min(equipment_list, key=lambda x: x.health_score).name,
+            }
+        }
+        
+        return Response(comparison_data, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        return Response({
+            'error': f'Error comparing equipment: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def export_excel(request, dataset_id):
+    """Export dataset to Excel format."""
+    from .exporters import DataExporter
+    
+    try:
+        # Verify dataset belongs to user
+        dataset = Dataset.objects.get(id=dataset_id, uploaded_by=request.user)
+        response = DataExporter.export_to_excel(dataset_id)
+        
+        if response:
+            return response
+        else:
+            return Response({'error': 'Export failed'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Dataset.DoesNotExist:
+        return Response({'error': 'Dataset not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def export_csv(request, dataset_id):
+    """Export dataset to CSV format."""
+    from .exporters import DataExporter
+    
+    try:
+        # Verify dataset belongs to user
+        dataset = Dataset.objects.get(id=dataset_id, uploaded_by=request.user)
+        response = DataExporter.export_to_csv(dataset_id)
+        
+        if response:
+            return response
+        else:
+            return Response({'error': 'Export failed'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Dataset.DoesNotExist:
+        return Response({'error': 'Dataset not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def export_json(request, dataset_id):
+    """Export dataset to JSON format."""
+    from .exporters import DataExporter
+    
+    try:
+        # Verify dataset belongs to user
+        dataset = Dataset.objects.get(id=dataset_id, uploaded_by=request.user)
+        response = DataExporter.export_to_json(dataset_id)
+        
+        if response:
+            return response
+        else:
+            return Response({'error': 'Export failed'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Dataset.DoesNotExist:
+        return Response({'error': 'Dataset not found'}, status=status.HTTP_404_NOT_FOUND)
+

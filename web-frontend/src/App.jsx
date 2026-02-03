@@ -5,6 +5,8 @@ import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import Upload from './components/Upload';
 import History from './components/History';
+import ComparisonTool from './components/ComparisonTool';
+
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(
@@ -28,6 +30,7 @@ function App() {
                         <div className="navbar-nav">
                             <Link to="/dashboard" className="nav-link">Dashboard</Link>
                             <Link to="/upload" className="nav-link">Upload</Link>
+                            <Link to="/comparison" className="nav-link">Comparison</Link>
                             <Link to="/history" className="nav-link">History</Link>
                             <button onClick={handleLogout} className="btn btn-secondary">
                                 Logout
@@ -59,6 +62,14 @@ function App() {
                     element={
                         isAuthenticated ?
                             <Upload onUploadSuccess={() => window.location.href = '/dashboard'} /> :
+                            <Navigate to="/login" />
+                    }
+                />
+                <Route
+                    path="/comparison"
+                    element={
+                        isAuthenticated ?
+                            <ComparisonTool /> :
                             <Navigate to="/login" />
                     }
                 />

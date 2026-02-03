@@ -66,9 +66,14 @@ class Equipment(models.Model):
     temperature = models.FloatField()
     
     # Calculated fields
-    health_score = models.FloatField(default=0.0)
-    risk_level = models.CharField(max_length=20, default='Unknown')  # Healthy, Warning, Critical
-    recommendations = models.TextField(blank=True)
+    health_score = models.FloatField()
+    risk_level = models.CharField(max_length=20)
+    recommendations = models.TextField()
+    
+    # Anomaly detection fields
+    is_anomaly = models.BooleanField(default=False)
+    anomaly_score = models.FloatField(default=0.0)
+    anomaly_reasons = models.JSONField(default=list, blank=True)
     
     class Meta:
         db_table = 'equipment'

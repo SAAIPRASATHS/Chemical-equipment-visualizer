@@ -145,7 +145,49 @@ class EquipmentAnalyzer:
         if not recommendations:
             recommendations.append("✅ Equipment operating within normal parameters - Continue routine monitoring")
         
-        return " | ".join(recommendations)
+        return " ".join(recommendations)
+    
+    def detect_anomalies(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Detect anomalies using Z-score method.
+        Values beyond 3 standard deviations are considered anomalies.
+        
+        Args:
+            df: DataFrame with equipment data
+            
+        Returns:
+            DataFrame with anomaly detection fields added
+        """
+        # Calculate Z-scores for numeric parameters
+        numeric_cols = ['Flowrate', 'Pressure', 'Temperature']
+        
+        df['is_anomaly'] = False
+        df['anomaly_score'] = 0.0
+        df['anomaly_reasons'] = [[] for _ in range(len(df))]
+        
+        for col in numeric_cols:
+            mean = df[col].mean()
+            std = df[col].std()
+            
+            if std > 0:  # Avoid division by zero
+                z_scores = np.abs((df[col] - mean) / std)
+                
+                # Mark anomalies (Z-score > 3)
+                anomaly_mask = z_scores > 3
+                df.loc[anomaly_mask, 'is_anomaly'] = True
+                
+                # Update anomaly score (max Z-score across all parameters)
+                df['anomaly_score'] = df['anomaly_score'].combine(z_scores, max)
+                
+                # Add reasons for anomalies
+                for idx in df[anomaly_mask].index:
+                    reasons_list = df.at[idx, 'anomaly_reasons']
+                    if not isinstance(reasons_list, list):
+                        reasons_list = []
+                    reasons_list.append(f"Unusual {col}: {df.at[idx, col]:.2f} (Z-score: {z_scores[idx]:.2f})")
+                    df.at[idx, 'anomaly_reasons'] = reasons_list
+        
+        return df
     
     def analyze_dataset(self, df: pd.DataFrame) -> Dict:
         """
@@ -171,6 +213,9 @@ class EquipmentAnalyzer:
                 row['Pressure'], row['Temperature'], row['Flowrate'], row['Type']
             ), axis=1
         )
+        
+        # Detect anomalies
+        df = self.detect_anomalies(df)
         
         # Calculate summary statistics
         summary = {

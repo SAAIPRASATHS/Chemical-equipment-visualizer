@@ -59,9 +59,77 @@ function Dashboard() {
         <div className="container">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h1>Equipment Health Dashboard</h1>
-                <button onClick={handleDownloadReport} className="btn btn-primary">
-                    Download Report
-                </button>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button onClick={handleDownloadReport} className="btn btn-primary">
+                        Download PDF Report
+                    </button>
+                    <div style={{ position: 'relative' }}>
+                        <button
+                            onClick={() => {
+                                const menu = document.getElementById('export-menu');
+                                menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+                            }}
+                            className="btn btn-success"
+                        >
+                            Export Data ▼
+                        </button>
+                        <div
+                            id="export-menu"
+                            style={{
+                                display: 'none',
+                                position: 'absolute',
+                                right: 0,
+                                top: '100%',
+                                marginTop: '0.5rem',
+                                backgroundColor: 'var(--bg-card)',
+                                border: '1px solid var(--border-color)',
+                                borderRadius: '8px',
+                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                                zIndex: 1000,
+                                minWidth: '150px'
+                            }}
+                        >
+                            <a
+                                href={`http://localhost:8000/api/export/excel/${current_dataset.id}/`}
+                                style={{
+                                    display: 'block',
+                                    padding: '0.75rem 1rem',
+                                    textDecoration: 'none',
+                                    color: 'var(--text-primary)',
+                                    borderBottom: '1px solid var(--border-color)'
+                                }}
+                                onClick={() => document.getElementById('export-menu').style.display = 'none'}
+                            >
+                                📊 Export to Excel
+                            </a>
+                            <a
+                                href={`http://localhost:8000/api/export/csv/${current_dataset.id}/`}
+                                style={{
+                                    display: 'block',
+                                    padding: '0.75rem 1rem',
+                                    textDecoration: 'none',
+                                    color: 'var(--text-primary)',
+                                    borderBottom: '1px solid var(--border-color)'
+                                }}
+                                onClick={() => document.getElementById('export-menu').style.display = 'none'}
+                            >
+                                📄 Export to CSV
+                            </a>
+                            <a
+                                href={`http://localhost:8000/api/export/json/${current_dataset.id}/`}
+                                style={{
+                                    display: 'block',
+                                    padding: '0.75rem 1rem',
+                                    textDecoration: 'none',
+                                    color: 'var(--text-primary)'
+                                }}
+                                onClick={() => document.getElementById('export-menu').style.display = 'none'}
+                            >
+                                🔧 Export to JSON
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Executive Summary */}
@@ -163,19 +231,27 @@ function Dashboard() {
                                     <th>Type</th>
                                     <th>Health Score</th>
                                     <th>Risk Level</th>
+                                    <th>Anomaly</th>
                                     <th>Recommendations</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {critical_equipment.map((eq) => (
                                     <tr key={eq.id}>
-                                        <td>{eq.name}</td>
+                                        <td><strong>{eq.name}</strong></td>
                                         <td>{eq.equipment_type}</td>
                                         <td>{eq.health_score.toFixed(1)}</td>
                                         <td>
                                             <span className={`badge badge-${eq.risk_level.toLowerCase()}`}>
                                                 {eq.risk_level}
                                             </span>
+                                        </td>
+                                        <td>
+                                            {eq.is_anomaly && (
+                                                <span className="badge badge-critical" title={eq.anomaly_reasons?.join(', ')}>
+                                                    ⚠️ Anomaly
+                                                </span>
+                                            )}
                                         </td>
                                         <td style={{ fontSize: '0.85rem' }}>{eq.recommendations}</td>
                                     </tr>
