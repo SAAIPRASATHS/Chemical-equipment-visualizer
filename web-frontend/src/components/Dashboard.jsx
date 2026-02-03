@@ -61,33 +61,50 @@ function Dashboard() {
 
     const handleExport = async (format) => {
         try {
-            const token = localStorage.getItem('access_token');
-            const response = await fetch(
-                `http://localhost:8000/api/export/${format}/${current_dataset.id}/`,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                }
-            );
+            console.log(`Starting export for format: ${format}`);
+            console.log(`Dataset ID: ${current_dataset.id}`);
 
-            if (!response.ok) throw new Error('Export failed');
+            const token = localStorage.getItem('access_token');
+            console.log(`Token exists: ${!!token}`);
+
+            const url = `http://localhost:8000/api/export/${format}/${current_dataset.id}/`;
+            console.log(`Export URL: ${url}`);
+
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            console.log(`Response status: ${response.status}`);
+            console.log(`Response ok: ${response.ok}`);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`Export error response: ${errorText}`);
+                throw new Error(`Export failed with status ${response.status}`);
+            }
 
             const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
+            console.log(`Blob size: ${blob.size} bytes`);
+            console.log(`Blob type: ${blob.type}`);
+
+            const downloadUrl = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.href = url;
+            link.href = downloadUrl;
             link.download = `export_${current_dataset.id}.${format === 'excel' ? 'xlsx' : format}`;
             document.body.appendChild(link);
             link.click();
             link.remove();
-            window.URL.revokeObjectURL(url);
+            window.URL.revokeObjectURL(downloadUrl);
+
+            console.log(`Export successful for ${format}`);
 
             // Close menu
             document.getElementById('export-menu').style.display = 'none';
         } catch (error) {
             console.error(`Error exporting to ${format}:`, error);
-            alert(`Failed to export to ${format}. Please try again.`);
+            alert(`Failed to export to ${format}. Check console for details.`);
         }
     };
 
