@@ -332,18 +332,30 @@ def compare_equipment(request):
 def export_excel(request, dataset_id):
     """Export dataset to Excel format."""
     from .exporters import DataExporter
+    import traceback
     
     try:
+        print(f"Export Excel request for dataset {dataset_id} by user {request.user}")
+        
         # Verify dataset belongs to user
         dataset = Dataset.objects.get(id=dataset_id, uploaded_by=request.user)
+        print(f"Dataset found: {dataset.filename}")
+        
         response = DataExporter.export_to_excel(dataset_id)
+        print(f"Export response generated: {response is not None}")
         
         if response:
             return response
         else:
+            print("Export failed: DataExporter returned None")
             return Response({'error': 'Export failed'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     except Dataset.DoesNotExist:
+        print(f"Dataset {dataset_id} not found for user {request.user}")
         return Response({'error': 'Dataset not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        print(f"Export Excel error: {str(e)}")
+        print(traceback.format_exc())
+        return Response({'error': f'Export failed: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])
@@ -351,9 +363,10 @@ def export_excel(request, dataset_id):
 def export_csv(request, dataset_id):
     """Export dataset to CSV format."""
     from .exporters import DataExporter
+    import traceback
     
     try:
-        # Verify dataset belongs to user
+        print(f"Export CSV request for dataset {dataset_id} by user {request.user}")
         dataset = Dataset.objects.get(id=dataset_id, uploaded_by=request.user)
         response = DataExporter.export_to_csv(dataset_id)
         
@@ -363,6 +376,10 @@ def export_csv(request, dataset_id):
             return Response({'error': 'Export failed'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     except Dataset.DoesNotExist:
         return Response({'error': 'Dataset not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        print(f"Export CSV error: {str(e)}")
+        print(traceback.format_exc())
+        return Response({'error': f'Export failed: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])
@@ -370,9 +387,10 @@ def export_csv(request, dataset_id):
 def export_json(request, dataset_id):
     """Export dataset to JSON format."""
     from .exporters import DataExporter
+    import traceback
     
     try:
-        # Verify dataset belongs to user
+        print(f"Export JSON request for dataset {dataset_id} by user {request.user}")
         dataset = Dataset.objects.get(id=dataset_id, uploaded_by=request.user)
         response = DataExporter.export_to_json(dataset_id)
         
@@ -382,4 +400,8 @@ def export_json(request, dataset_id):
             return Response({'error': 'Export failed'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     except Dataset.DoesNotExist:
         return Response({'error': 'Dataset not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        print(f"Export JSON error: {str(e)}")
+        print(traceback.format_exc())
+        return Response({'error': f'Export failed: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
